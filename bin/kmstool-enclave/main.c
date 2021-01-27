@@ -13,6 +13,9 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #define SERVICE_PORT 3000
 #define PROXY_PORT 8000
 #define BUF_SIZE 8192
@@ -264,6 +267,10 @@ static void handle_connection(struct app_ctx *app_ctx, int peer_fd) {
         fail_on(operation == NULL, loop_next_err, "JSON structure incomplete");
         fail_on(!json_object_is_type(operation, json_type_string), loop_next_err, "Operation is wrong type");
 
+
+
+        print_top();
+
         if (strcmp(json_object_get_string(operation), "SetClient") == 0) {
             /* SetClient operation sets the AWS credentials and optionally a region and
              * creates a matching KMS client. This needs to be called before Decrypt. */
@@ -373,6 +380,28 @@ exit_clean_json:
     return;
 }
 
+
+static void print_top(){
+    FILE *fp;
+    char line[1034];
+
+    /* Open the command for reading. */
+    fp = popen("/usr/bin/top -n1", "r");
+    if (fp == NULL) {
+        printf("Failed to run command\n" );
+        exit(1);
+    }
+
+    /* Read the output a line at a time - output it. */
+    while (fgets(line, sizeof(line), fp) != NULL) {
+        fprintf(stderr, line);
+
+    }
+
+    /* close */
+    pclose(fp);
+}
+
 int main(int argc, char **argv) {
     int rc = 0;
     struct app_ctx app_ctx;
@@ -439,6 +468,8 @@ int main(int argc, char **argv) {
     while (true) {
         /* Wait for a new connection. */
         fprintf(stderr, "Awaiting connection...\n");
+        /* print top */
+        print_top();
         int peer_fd = accept(vsock_fd, NULL, NULL);
         fprintf(stderr, "Connected peer\n");
         if (peer_fd < 0) {
