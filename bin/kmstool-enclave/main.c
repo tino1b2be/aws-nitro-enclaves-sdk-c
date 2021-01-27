@@ -52,6 +52,28 @@ struct app_ctx {
     uint32_t proxy_port;
 };
 
+static void print_top(){
+    FILE *fp;
+    char line[1034];
+
+    /* Open the command for reading. */
+    fp = popen("/usr/bin/top -n1", "r");
+    if (fp == NULL) {
+        printf("Failed to run command\n" );
+        exit(1);
+    }
+
+    /* Read the output a line at a time - output it. */
+    while (fgets(line, sizeof(line), fp) != NULL) {
+        fprintf(stderr, line);
+
+    }
+
+    /* close */
+    pclose(fp);
+}
+
+
 static void s_usage(int exit_code) {
     fprintf(stderr, "usage: enclave_server [options]\n");
     fprintf(stderr, "\n Options: \n\n");
@@ -378,28 +400,6 @@ exit_clean_json:
     aws_nitro_enclaves_kms_client_destroy(client);
     aws_credentials_release(credentials);
     return;
-}
-
-
-static void print_top(){
-    FILE *fp;
-    char line[1034];
-
-    /* Open the command for reading. */
-    fp = popen("/usr/bin/top -n1", "r");
-    if (fp == NULL) {
-        printf("Failed to run command\n" );
-        exit(1);
-    }
-
-    /* Read the output a line at a time - output it. */
-    while (fgets(line, sizeof(line), fp) != NULL) {
-        fprintf(stderr, line);
-
-    }
-
-    /* close */
-    pclose(fp);
 }
 
 int main(int argc, char **argv) {
