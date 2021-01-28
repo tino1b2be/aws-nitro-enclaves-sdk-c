@@ -288,7 +288,6 @@ static void handle_connection(struct app_ctx *app_ctx, int peer_fd) {
         fail_on(operation == NULL, loop_next_err, "JSON structure incomplete");
         fail_on(!json_object_is_type(operation, json_type_string), loop_next_err, "Operation is wrong type");
 
-
         if (strcmp(json_object_get_string(operation), "SetClient") == 0) {
             /* SetClient operation sets the AWS credentials and optionally a region and
              * creates a matching KMS client. This needs to be called before Decrypt. */
@@ -376,7 +375,6 @@ static void handle_connection(struct app_ctx *app_ctx, int peer_fd) {
             rc = s_send_status(peer_fd, STATUS_ERR, "Operation not recognized");
             break_on(rc <= 0);
         }
-	
         json_object_put(object);
         object = NULL;
         continue;

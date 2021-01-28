@@ -69,9 +69,7 @@ RUN cmake3 --build aws-nitro-enclaves-sdk-c/build --target test
 FROM amazonlinux as kmstool-enclave
 
 # TODO: building packages statically instead of cleaning up unwanted packages from amazonlinux
-#RUN yum install -y procps-ng
 RUN rpm -e python python-libs python-urlgrabber python2-rpm pygpgme pyliblzma python-iniparse pyxattr python-pycurl amazon-linux-extras yum yum-metadata-parser yum-plugin-ovl yum-plugin-priorities
-#RUN yum install -y procps-ng
 COPY --from=builder /usr/lib64/libnsm.so /usr/lib64/libnsm.so
 COPY --from=builder /usr/bin/kmstool_enclave /kmstool_enclave
 CMD ["/kmstool_enclave"]
@@ -89,6 +87,6 @@ CMD ["/kmstool_instance"]
 FROM amazonlinux as kmstool-enclave-cli
 
 # TODO: building packages statically instead of cleaning up unwanted packages from amazonlinux
-#RUN rpm -e python python-libs python-urlgrabber python2-rpm pygpgme pyliblzma python-iniparse pyxattr python-pycurl amazon-linux-extras yum yum-metadata-parser yum-plugin-ovl yum-plugin-priorities
+RUN rpm -e python python-libs python-urlgrabber python2-rpm pygpgme pyliblzma python-iniparse pyxattr python-pycurl amazon-linux-extras yum yum-metadata-parser yum-plugin-ovl yum-plugin-priorities
 COPY --from=builder /usr/lib64/libnsm.so /usr/lib64/libnsm.so
 COPY --from=builder /usr/bin/kmstool_enclave_cli /kmstool_enclave_cli
