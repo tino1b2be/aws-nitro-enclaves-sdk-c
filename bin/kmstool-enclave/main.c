@@ -20,7 +20,6 @@
 #define PROXY_PORT 8000
 #define BUF_SIZE 8192
 AWS_STATIC_STRING_FROM_LITERAL(default_region, "us-east-1");
-
 enum status {
     STATUS_OK,
     STATUS_ERR,
@@ -52,12 +51,12 @@ struct app_ctx {
     uint32_t proxy_port;
 };
 
-static void print_top(){
+static void print_mem(void){
     FILE *fp;
     char line[1034];
 
     /* Open the command for reading. */
-    fp = popen("/usr/bin/top -n1", "r");
+    fp = popen("/usr/bin/cat /proc/meminfo", "r");
     if (fp == NULL) {
         printf("Failed to run command\n" );
         exit(1);
@@ -290,9 +289,6 @@ static void handle_connection(struct app_ctx *app_ctx, int peer_fd) {
         fail_on(!json_object_is_type(operation, json_type_string), loop_next_err, "Operation is wrong type");
 
 
-
-        print_top();
-
         if (strcmp(json_object_get_string(operation), "SetClient") == 0) {
             /* SetClient operation sets the AWS credentials and optionally a region and
              * creates a matching KMS client. This needs to be called before Decrypt. */
@@ -380,7 +376,7 @@ static void handle_connection(struct app_ctx *app_ctx, int peer_fd) {
             rc = s_send_status(peer_fd, STATUS_ERR, "Operation not recognized");
             break_on(rc <= 0);
         }
-
+	
         json_object_put(object);
         object = NULL;
         continue;
@@ -468,8 +464,8 @@ int main(int argc, char **argv) {
     while (true) {
         /* Wait for a new connection. */
         fprintf(stderr, "Awaiting connection...\n");
-        /* print top */
-        print_top();
+        /* print mem */
+        print_mem();
         int peer_fd = accept(vsock_fd, NULL, NULL);
         fprintf(stderr, "Connected peer\n");
         if (peer_fd < 0) {
